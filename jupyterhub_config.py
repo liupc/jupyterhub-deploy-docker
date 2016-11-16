@@ -23,7 +23,15 @@ spawn_cmd = os.environ.get('DOCKER_SPAWN_CMD', "start-singleuser.sh")
 c.DockerSpawner.extra_create_kwargs.update({ 'command': spawn_cmd })
 # Connect containers to this Docker network
 network_name = os.environ['DOCKER_NETWORK_NAME']
-c.DockerSpawner.use_internal_ip = True
+#c.DockerSpawner.use_internal_ip = True
+c.DockerSpawner.use_internal_ip = False
+c.DockerSpawner.container_ip="0.0.0.0"
+os.environ["DOCKER_HOST"] = "tcp://{{your docker swarm master ip}}:3376"
+os.environ["DOCKER_TLS_VERIFY"]="1"
+os.environ["DOCKER_CERT_PATH"]="/srv/jupyterhub/swarm" # provide your own ca.pem key.pem secret.pem
+os.environ["DOCKER_MACHINE_NAME"]="swarm-master"
+c.DockerSpawner.use_docker_client_env = True # enable tls auth
+c.DockerSpawner.container_prefix = "jupyter-docker"
 c.DockerSpawner.network_name = network_name
 # Pass the network name as argument to spawned containers
 c.DockerSpawner.extra_host_config = { 'network_mode': network_name }
@@ -44,6 +52,7 @@ c.DockerSpawner.debug = True
 
 # User containers will access hub by container name on the Docker network
 c.JupyterHub.hub_ip = 'jupyterhub'
+c.DockerSpawner.hub_ip_connect = 'jupyterhub'
 c.JupyterHub.hub_port = 8080
 
 # TLS config
